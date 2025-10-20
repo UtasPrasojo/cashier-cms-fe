@@ -4,23 +4,24 @@
     <div
       class="flex justify-between items-center bg-white rounded-2xl shadow p-4 mb-6"
     >
-      <h1 class="text-2xl  font-bold text-blue-600">MASPOS</h1>
+      <h1 class="text-2xl font-bold text-blue-600">MASPOS</h1>
 
       <div class="flex items-center gap-3">
         <a-button type="primary" size="large">+ Tambah Kategori</a-button>
         <a-button type="primary" size="large">+ Tambah Produk</a-button>
 
         <div
-          class="flex justify-start items-center bg-blue-50 border border-blue-200 text-blue-600 font-semibold rounded-lg "
+          class="flex justify-start items-center bg-blue-50 border border-blue-200 text-blue-600 rounded-lg"
         >
           <div
             class="flex items-center justify-center bg-blue-600 border border-blue-600 text-white font-semibold rounded-lg w-10 h-10 mr-2"
           >
             <i class="ri-shopping-cart-2-line text-lg"></i>
           </div>
-
-          Total Tagihan
-          <span class="ml-2">Rp {{ totalPrice.toLocaleString("id-ID") }}</span>
+          <span class="flex items-center justify-center text-m ">Total Tagihan</span>
+          <span class="ml-2 mr-2 font-semibold"
+            >Rp {{ totalPrice.toLocaleString("id-ID") }}</span
+          >
         </div>
 
         <a-avatar
