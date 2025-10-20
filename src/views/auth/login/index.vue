@@ -1,44 +1,141 @@
 <template>
-  <h1 class="font-semibold text-lg">Login Page</h1>
-  <form action="" @submit.prevent="login">
-    <div class="mb-6">
-        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 ">Email address</label>
-        <input v-model="formData.email" type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="john.doe@company.com" required>
+  <div class="flex h-screen bg-gray-100">
+    <!-- Left Section -->
+    <div
+      class="hidden md:flex w-1/2 items-center justify-center bg-gradient-to-b from-blue-500 to-blue-700 rounded-3xl shadow-lg m-6 overflow-hidden"
+    >
+      <img
+        src="@/assets/image/Image.png"
+        alt="Login Image"
+        class="w-full h-full object-cover"
+      />
     </div>
-    <div class="mb-6">
-        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 ">Password</label>
-        <input v-model="formData.password" type="password" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="•••••••••" required>
-    </div>
-    <ButtonPrimary :type="'submit'">
-      Login
-    </ButtonPrimary>
-    <ButtonDanger @click="$router.push('/register')" class="ml-3">
-      Register
-    </ButtonDanger>
-  </form>
 
+    <!-- Right Section -->
+    <div class="w-full md:w-1/2 flex flex-col justify-start px-10">
+      <!-- Logo -->
+      <div class="w-full flex justify-end mb-16 mt-6">
+        <img
+          src="@/assets/image/MASPOS.png"
+          alt="Logo MASPOS"
+          class="w-30 h-auto object-contain"
+        />
+      </div>
+
+      <!-- Login Form -->
+      <div class="mx-auto w-full mt-32">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">
+          Selamat Datang di <span class="text-blue-600">MASPOS</span>
+        </h1>
+        <p class="text-gray-600 mb-8 w-full">
+          Masuk untuk mengelola bisnis Anda dengan mudah dan efisien. MASPOS
+          menghadirkan solusi point-of-sale terbaik untuk kemudahan operasional
+          sehari-hari¸
+        </p>
+
+        <a-form layout="vertical" @submit.prevent="login">
+          <a-form-item label="Email">
+            <a-input
+              v-model:value="formData.email"
+              size="large"
+              placeholder="Email"
+            />
+          </a-form-item>
+          <a-form-item label="Password">
+            <a-input-password
+              v-model:value="formData.password"
+              size="large"
+              placeholder="Password"
+            />
+          </a-form-item>
+          <a-form-item>
+            <a-button
+              type="primary"
+              block
+              html-type="submit"
+              size="large"
+              class="mt-2"
+              :loading="loading"
+            >
+              Masuk
+            </a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+    </div>
+  </div>
 </template>
 
-<script>
-  import {
-    useAuthStore
-  } from "@/stores/auth.store.js"
+<script setup>
+import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth.store.js";
+import { message } from "ant-design-vue";
 
-  export default {
-    data() {
-      return {
-        authStore: useAuthStore(),
-        formData: {
-          email: "",
-          password: "",
-        }
-      }
-    },
-    methods: {
-      login() {
-        this.authStore.login(this.formData)
-      }
-    }
+const authStore = useAuthStore();
+const loading = ref(false);
+
+const formData = ref({
+  email: "",
+  password: "",
+});
+
+const login = async () => {
+  try {
+    loading.value = true;
+    await authStore.login(formData.value);
+    message.success("Berhasil masuk!");
+  } catch (error) {
+    message.error("Gagal login, periksa email atau password!");
+  } finally {
+    loading.value = false;
   }
+};
 
+const products = [
+  {
+    name: "Pepperoni Cheese",
+    price: 50000,
+    image: "https://source.unsplash.com/200x200/?pizza",
+  },
+  {
+    name: "Smoky Bacon Ranch",
+    price: 47500,
+    image: "https://source.unsplash.com/200x200/?bacon,pizza",
+  },
+  {
+    name: "Mediterranean Feast",
+    price: 57000,
+    image: "https://source.unsplash.com/200x200/?pasta",
+  },
+  {
+    name: "Mushroom & Truffle",
+    price: 38000,
+    image: "https://source.unsplash.com/200x200/?mushroom",
+  },
+  {
+    name: "Burger Gliz",
+    price: 29000,
+    image: "https://source.unsplash.com/200x200/?burger",
+  },
+  {
+    name: "Coca Cola",
+    price: 10000,
+    image: "https://source.unsplash.com/200x200/?coke",
+  },
+  {
+    name: "Lechy Tea",
+    price: 12000,
+    image: "https://source.unsplash.com/200x200/?tea",
+  },
+];
 </script>
+
+<style scoped>
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+}
+</style>
