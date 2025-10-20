@@ -4,7 +4,7 @@
     <router-link to="/user" class="link">User</router-link>
     <div class="link" @click="authStore.logout()">Logout</div>
   </div>
-  <div class="p-5">
+  <div class="p-2 bg-gray-100">
     <slot />
   </div>
 </template>

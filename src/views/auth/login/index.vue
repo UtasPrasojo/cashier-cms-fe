@@ -1,6 +1,5 @@
 <template>
   <div class="flex h-screen bg-gray-100">
-    <!-- Left Section -->
     <div
       class="hidden md:flex w-1/2 items-center justify-center bg-gradient-to-b from-blue-500 to-blue-700 rounded-3xl shadow-lg m-6 overflow-hidden"
     >
@@ -10,10 +9,7 @@
         class="w-full h-full object-cover"
       />
     </div>
-
-    <!-- Right Section -->
     <div class="w-full md:w-1/2 flex flex-col justify-start px-10">
-      <!-- Logo -->
       <div class="w-full flex justify-end mb-16 mt-6">
         <img
           src="@/assets/image/MASPOS.png"
@@ -21,8 +17,6 @@
           class="w-30 h-auto object-contain"
         />
       </div>
-
-      <!-- Login Form -->
       <div class="mx-auto w-full mt-32">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">
           Selamat Datang di <span class="text-blue-600">MASPOS</span>

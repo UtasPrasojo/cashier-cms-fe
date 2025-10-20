@@ -4,7 +4,7 @@ import { axiosWrapper } from '@/helper/axios-wrapper.js';
 
 import router from '@/router/index.js';
 
-const baseUrl = import.meta.env.VITE_BASE_URL;
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 export const useAuthStore = defineStore({
     id: 'auth',

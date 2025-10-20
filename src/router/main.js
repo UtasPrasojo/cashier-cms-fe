@@ -1,4 +1,5 @@
 import HomeView from '@/views/home/index.vue'
+import CartView from '@/views/cart/cart-view/index.vue'
 import UserView from '@/views/user/index.vue'
 import UserCreateView from '@/views/user/create.vue'
 import UserUpdateView from '@/views/user/update.vue'
@@ -14,6 +15,16 @@ export default [{
     component: HomeView,
     meta: {
       title: 'Home',
+      layout: ExampleLayout,
+      middleware: [AuthMiddleware],
+    },
+  },
+    {
+    path: '/cart-view',
+    name: 'cart.view',
+    component: CartView,
+    meta: {
+      title: 'Cart View',
       layout: ExampleLayout,
       middleware: [AuthMiddleware],
     },
