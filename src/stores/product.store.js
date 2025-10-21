@@ -16,9 +16,9 @@ export const useProductStore = defineStore({
       this.loading = true;
       try {
         const res = await axiosWrapper.get(`${baseUrl}/product`);
-        if (res.status === 200) {
-          this.products = res.data;
-        }
+        this.products = Array.isArray(res.data)
+          ? res.data
+          : res.data?.data || [];
       } catch (err) {
         this.error = err;
         console.error("Gagal mengambil data produk:", err);
@@ -31,9 +31,7 @@ export const useProductStore = defineStore({
       this.loading = true;
       try {
         const res = await axiosWrapper.get(`${baseUrl}/product/${id}`);
-        if (res.status === 200) {
-          this.product = res.data;
-        }
+        this.product = res.data || null;
       } catch (err) {
         this.error = err;
         console.error(`Gagal mengambil produk dengan ID ${id}:`, err);
@@ -42,17 +40,27 @@ export const useProductStore = defineStore({
       }
     },
 
-    async create(data) {
+    async create(formData) {
       this.loading = true;
       try {
-        const res = await axiosWrapper.post(`${baseUrl}/product`, data, true);
-        if (res.status === 201 || res.status === 200) {
+        const res = await axiosWrapper.post(
+          `${baseUrl}/product`,
+          formData,
+          false,
+          "multipart/form-data"
+        );
+
+        // res sudah langsung data backend
+        if (res?.data) {
           this.products.push(res.data);
+          return res;
+        } else {
+          throw new Error("Gagal menambahkan produk");
         }
-        return res;
       } catch (err) {
         this.error = err;
         console.error("Gagal menambah produk:", err);
+        throw err;
       } finally {
         this.loading = false;
       }
@@ -61,12 +69,8 @@ export const useProductStore = defineStore({
     async update(id, data) {
       this.loading = true;
       try {
-        const res = await axiosWrapper.put(
-          `${baseUrl}/product/${id}`,
-          data,
-          true
-        );
-        if (res.status === 200) {
+        const res = await axiosWrapper.put(`${baseUrl}/product/${id}`, data);
+        if (res?.data) {
           const index = this.products.findIndex((p) => p.id === id);
           if (index !== -1) {
             this.products[index] = res.data;
@@ -85,7 +89,7 @@ export const useProductStore = defineStore({
       this.loading = true;
       try {
         const res = await axiosWrapper.delete(`${baseUrl}/product/${id}`);
-        if (res.status === 200 || res.status === 204) {
+        if (res) {
           this.products = this.products.filter((p) => p.id !== id);
         }
         return res;

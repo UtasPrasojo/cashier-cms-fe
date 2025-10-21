@@ -3,50 +3,72 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth.store.js";
 import { useProductStore } from "@/stores/product.store.js";
+import { useCategoryStore } from "@/stores/category.store.js";
+import { message, Modal } from "ant-design-vue";
+
+const router = useRouter();
+const authStore = useAuthStore();
+const productStore = useProductStore();
+const categoryStore = useCategoryStore();
 
 const search = ref("");
-const selectedCategory = ref("Semua");
-const authStore = useAuthStore();
-const router = useRouter();
-const productStore = useProductStore();
+const selectedCategory = ref(null);
+const isLoading = ref(true);
+
 const products = computed(() => productStore.products || []);
-const categories = ref(["Semua", "Burger", "Pizza", "Drink"]);
+const categories = computed(() => categoryStore.categories || []);
+
+// --- Ambil data produk & kategori ---
 onMounted(async () => {
   try {
-    await productStore.getAll();
+    await Promise.all([productStore.getAll(), categoryStore.getAll()]);
   } finally {
     isLoading.value = false;
   }
 });
 
-
-const goToAddCategory = () => {
-  router.push("/add-category");
-};
-const goToAddProduct = () => {
-  router.push("/add-product");
-};
-const goToCartView = () => {
-  router.push("/cart-view");
-};
+// --- Navigasi tombol ---
+const goToAddCategory = () => router.push("/add-category");
+const goToAddProduct = () => router.push("/add-product");
+const goToCartView = () => router.push("/cart-view");
 const handleLogout = () => {
   authStore.logout();
-  message.success("Berhasil logout!");
   router.push("/login");
 };
 
-// --- Filter produk berdasarkan kategori & pencarian
+// --- Filter produk berdasarkan kategori & pencarian ---
 const filteredProducts = computed(() => {
-  return products.value.filter((item) => {
+  const list = products.value || [];
+  return list.filter((item) => {
     const matchCategory =
-      selectedCategory.value === "Semua" ||
-      item.category === selectedCategory.value;
+      !selectedCategory.value || item.category_id === selectedCategory.value.id;
+
     const matchSearch = item.name
-      .toLowerCase()
+      ?.toLowerCase()
       .includes(search.value.toLowerCase());
+
     return matchCategory && matchSearch;
   });
 });
+
+const deleteProduct = (id) => {
+  Modal.confirm({
+    title: "Konfirmasi Hapus",
+    content: "Apakah kamu yakin ingin menghapus produk ini?",
+    okText: "Ya, Hapus",
+    cancelText: "Batal",
+    okType: "danger",
+    async onOk() {
+      try {
+        await productStore.delete(id);
+        message.success("Produk berhasil dihapus!");
+      } catch (error) {
+        message.error("Gagal menghapus produk!");
+        console.error(error);
+      }
+    },
+  });
+};
 </script>
 
 <template>
@@ -95,22 +117,55 @@ const filteredProducts = computed(() => {
     <div
       class="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-2 items-center"
     >
-      <a-input-search
-        v-model:value="search"
-        placeholder="Cari nama produk..."
-        class="max-w-xs"
-        allow-clear
-      />
+      <div class="relative">
+        <a-input-search
+          v-model:value="search"
+          placeholder="Cari nama produk..."
+          class="max-w-xs"
+          allow-clear
+        />
+
+        <!-- Dropdown hasil pencarian -->
+        <div
+          v-if="search && filteredProducts.length > 0"
+          class="absolute z-10 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 w-full max-w-xs"
+        >
+          <div
+            v-for="product in filteredProducts"
+            :key="product.id"
+            class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+            @click="selectProduct(product)"
+          >
+            {{ product.name }}
+          </div>
+        </div>
+
+        <!-- Jika tidak ada hasil -->
+        <div
+          v-else-if="search && filteredProducts.length === 0"
+          class="absolute z-10 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 w-full max-w-xs px-3 py-2 text-gray-500"
+        >
+          Tidak ada produk ditemukan
+        </div>
+      </div>
 
       <div class="flex flex-wrap gap-2">
         <a-tag
+          :color="!selectedCategory ? 'blue' : ''"
+          @click="selectedCategory = null"
+          class="cursor-pointer hover:scale-105 transition"
+        >
+          Semua
+        </a-tag>
+
+        <a-tag
           v-for="(category, index) in categories"
-          :key="index"
-          :color="selectedCategory === category ? 'blue' : ''"
+          :key="category.id"
+          :color="selectedCategory?.id === category.id ? 'blue' : ''"
           @click="selectedCategory = category"
           class="cursor-pointer hover:scale-105 transition"
         >
-          {{ category }}
+          {{ category.name }}
         </a-tag>
       </div>
     </div>
@@ -122,15 +177,27 @@ const filteredProducts = computed(() => {
         class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
       >
         <div
-          v-for="(item, index) in products"
+          v-for="(item, index) in filteredProducts"
           :key="item.id"
-          class="bg-white rounded-xl shadow hover:shadow-lg transition"
+          class="bg-white rounded-xl shadow hover:shadow-lg transition relative overflow-hidden"
         >
-          <img
-            :src="item.picture_url"
-            alt="product"
-            class="rounded-t-xl w-full h-40 object-cover"
-          />
+          <div class="relative">
+            <img
+              :src="item.picture_url"
+              alt="product"
+              class="rounded-t-xl w-full h-40 object-cover"
+            />
+
+            <!-- Tombol Hapus di pojok kanan bawah -->
+            <button
+              @click="deleteProduct(item.id)"
+              class="absolute bottom-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full shadow-md transition"
+              title="Hapus produk"
+            >
+              <i class="ri-delete-bin-line text-sm"></i>
+            </button>
+          </div>
+
           <div class="p-3">
             <p class="text-sm font-semibold truncate">{{ item.name }}</p>
             <p class="text-blue-600 font-medium mb-3">

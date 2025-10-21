@@ -1,80 +1,100 @@
-import { defineStore } from 'pinia'
-import { useHttp } from '@/composables/useHttp'
+import { defineStore } from "pinia";
+import { axiosWrapper } from "@/helper/axios-wrapper.js";
 
-export const useCategoryStore = defineStore('category', {
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+export const useCategoryStore = defineStore({
+  id: "category",
   state: () => ({
     categories: [],
+    category: null,
+    loading: false,
+    error: null,
   }),
-
   actions: {
     async getAll() {
-      const { get } = useHttp()
+      this.loading = true;
       try {
-        const res = await get('/category') // Endpoint API
-        if (res.status === 200) {
-          this.categories = res.data
-        }
-        return res
-      } catch (error) {
-        console.error('Error fetching categories:', error)
-        throw error
+        const res = await axiosWrapper.get(`${baseUrl}/category`);
+        this.categories = Array.isArray(res.data)
+          ? res.data
+          : res.data?.data || [];
+      } catch (err) {
+        this.error = err;
+        console.error("Gagal mengambil kategori:", err);
+      } finally {
+        this.loading = false;
       }
     },
 
     async getById(id) {
-      const { get } = useHttp()
+      this.loading = true;
       try {
-        const res = await get(`/category/${id}`)
-        return res
-      } catch (error) {
-        console.error(`Error fetching category with ID ${id}:`, error)
-        throw error
-      }
-    },
-
-    async createCategory(payload) {
-      const { post } = useHttp()
-      try {
-        const res = await post('/category', payload)
-        if (res.status === 201) {
-          this.categories.push(res.data)
-        }
-        return res
-      } catch (error) {
-        console.error('Error creating category:', error)
-        throw error
-      }
-    },
-
-    async updateCategory(id, payload) {
-      const { patch } = useHttp()
-      try {
-        const res = await patch(`/category/${id}`, payload)
+        const res = await axiosWrapper.get(`${baseUrl}/category/${id}`);
         if (res.status === 200) {
-          const index = this.categories.findIndex(cat => cat.id === id)
+          this.category = res.data;
+        }
+      } catch (err) {
+        this.error = err;
+        console.error(`Gagal mengambil kategori dengan ID ${id}:`, err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async create(data) {
+      this.loading = true;
+      try {
+        const res = await axiosWrapper.post(`${baseUrl}/category`, data, true);
+        if (res.status === 201 || res.status === 200) {
+          this.categories.push(res.data);
+        }
+        return res;
+      } catch (err) {
+        this.error = err;
+        console.error("Gagal menambah kategori:", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async update(id, data) {
+      this.loading = true;
+      try {
+        const res = await axiosWrapper.put(
+          `${baseUrl}/category/${id}`,
+          data,
+          true
+        );
+        if (res.status === 200) {
+          const index = this.categories.findIndex((c) => c.id === id);
           if (index !== -1) {
-            this.categories[index] = res.data
+            this.categories[index] = res.data;
           }
         }
-        return res
-      } catch (error) {
-        console.error('Error updating category:', error)
-        throw error
+        return res;
+      } catch (err) {
+        this.error = err;
+        console.error("Gagal mengupdate kategori:", err);
+      } finally {
+        this.loading = false;
       }
     },
 
-    async deleteCategory(id) {
-      const { del } = useHttp()
+    async delete(id) {
+      this.loading = true;
       try {
-        const res = await del(`/category/${id}`)
-        if (res.status === 200) {
-          this.categories = this.categories.filter(cat => cat.id !== id)
+        const res = await axiosWrapper.delete(`${baseUrl}/category/${id}`);
+        if (res.status === 200 || res.status === 204) {
+          this.categories = this.categories.filter((c) => c.id !== id);
         }
-        return res
-      } catch (error) {
-        console.error('Error deleting category:', error)
-        throw error
+        return res;
+      } catch (err) {
+        this.error = err;
+        console.error("Gagal menghapus kategori:", err);
+      } finally {
+        this.loading = false;
       }
     },
   },
-})
+});
