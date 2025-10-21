@@ -15,7 +15,7 @@
             />
           </a-form-item>
 
-          <div class="flex justify-start w-full space-x-3  pt-4">
+          <div class="flex justify-start w-full space-x-3 pt-4">
             <a-button
               class="border-blue-500 text-blue-500 hover:bg-blue-50 w-full rounded-lg"
               @click="handleCancel"
@@ -25,6 +25,7 @@
             <a-button
               type="primary"
               class="bg-blue-600 hover:bg-blue-700 w-full rounded-lg"
+              :loading="isSubmitting"
               @click="handleSubmit"
             >
               Tambah
@@ -36,24 +37,41 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
+import { useCategoryStore } from '@/stores/category.store.js'
 
+const categoryStore = useCategoryStore()
+const router = useRouter()
 const category = ref('')
+const isSubmitting = ref(false)
 
-function handleSubmit() {
+const handleSubmit = async () => {
   if (!category.value.trim()) {
     message.warning('Nama kategori tidak boleh kosong')
     return
   }
-  message.success(`Kategori "${category.value}" berhasil ditambahkan!`)
-  category.value = ''
+
+  isSubmitting.value = true
+  try {
+    await categoryStore.create({ name: category.value })
+    message.success(`Kategori "${category.value}" berhasil ditambahkan!`)
+    category.value = ''
+    router.push('/') // sesuaikan dengan route daftar kategori Anda
+  } catch (err) {
+    message.error('Gagal menambah kategori!')
+    console.error(err)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
-function handleCancel() {
+const handleCancel = () => {
   message.info('Batal menambah kategori')
   category.value = ''
+  router.push('/')
 }
 </script>
 

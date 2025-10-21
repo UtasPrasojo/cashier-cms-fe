@@ -9,17 +9,15 @@ const router = useRouter();
 const productStore = useProductStore();
 const categoryStore = useCategoryStore();
 
-// Form state
 const formState = reactive({
   name: "",
   price: null,
   category_id: null,
-  file: null, // simpan file asli langsung di sini
+  file: null, 
 });
 
 const isSubmitting = ref(false);
 
-// Ambil kategori saat mounted
 onMounted(async () => {
   try {
     await categoryStore.getAll();
@@ -28,7 +26,6 @@ onMounted(async () => {
   }
 });
 
-// Mapping kategori ke options untuk select
 const categoryOptions = computed(() => {
   if (!categoryStore.categories || !Array.isArray(categoryStore.categories)) {
     return [];
@@ -37,23 +34,22 @@ const categoryOptions = computed(() => {
   return categoryStore.categories.map((item) => ({
     label: item?.name || 'Unknown',
     value: item?.id || '',
-  })).filter(option => option.value); // Filter out invalid options
+  })).filter(option => option.value);
 });
 
-// Sebelum upload file
 const beforeUpload = (file) => {
   const isImage = file.type === "image/jpeg" || file.type === "image/png";
   if (!isImage) {
     message.error("Hanya file JPG atau PNG yang diperbolehkan!");
     return false;
   }
-  // Simpan file asli
+
   formState.file = file;
   message.success(`File "${file.name}" berhasil dipilih`);
-  return false; // mencegah upload otomatis
+  return false; 
 };
 
-// Submit form
+
 const handleSubmit = async () => {
   if (
     !formState.name ||
@@ -108,7 +104,6 @@ const handleCancel = () => {
           Tambah Produk
         </h2>
 
-        <!-- Upload Gambar -->
         <a-upload-dragger
           :file-list="formState.file ? [formState.file] : []"
           name="file"
@@ -127,7 +122,6 @@ const handleCancel = () => {
           </div>
         </a-upload-dragger>
 
-        <!-- Form Input -->
         <a-form layout="vertical" @submit.prevent="handleSubmit">
           <a-form-item label="Produk">
             <a-input
@@ -155,7 +149,6 @@ const handleCancel = () => {
             />
           </a-form-item>
 
-          <!-- Tombol Aksi -->
           <div class="flex justify-end space-x-3 border-t w-full pt-4">
             <a-button
               class="border-blue-500 text-blue-500 w-full hover:bg-blue-50 rounded-lg"
