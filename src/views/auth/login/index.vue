@@ -27,15 +27,15 @@
           sehari-hari¸
         </p>
 
-        <a-form layout="vertical" @submit.prevent="login">
-          <a-form-item label="Email">
+        <a-form layout="vertical" @submit.prevent="login" ref="loginForm" :model="formData">
+          <a-form-item name="email" label="Email" :rules="[{ required: true, message: 'Please input your Email!' }]">
             <a-input
               v-model:value="formData.email"
               size="large"
               placeholder="Email"
             />
           </a-form-item>
-          <a-form-item label="Password">
+          <a-form-item name="password" label="Password" :rules="[{ required: true, message: 'Please input your Password!' }]">
             <a-input-password
               v-model:value="formData.password"
               size="large"
@@ -67,6 +67,7 @@ import { message } from "ant-design-vue";
 
 const authStore = useAuthStore();
 const loading = ref(false);
+const loginForm = ref(null);
 
 const formData = ref({
   email: "",
@@ -77,7 +78,6 @@ const login = async () => {
   try {
     loading.value = true;
     await authStore.login(formData.value);
-    message.success("Berhasil masuk!");
   } catch (error) {
     message.error("Gagal login, periksa email atau password!");
   } finally {
@@ -85,43 +85,7 @@ const login = async () => {
   }
 };
 
-const products = [
-  {
-    name: "Pepperoni Cheese",
-    price: 50000,
-    image: "https://source.unsplash.com/200x200/?pizza",
-  },
-  {
-    name: "Smoky Bacon Ranch",
-    price: 47500,
-    image: "https://source.unsplash.com/200x200/?bacon,pizza",
-  },
-  {
-    name: "Mediterranean Feast",
-    price: 57000,
-    image: "https://source.unsplash.com/200x200/?pasta",
-  },
-  {
-    name: "Mushroom & Truffle",
-    price: 38000,
-    image: "https://source.unsplash.com/200x200/?mushroom",
-  },
-  {
-    name: "Burger Gliz",
-    price: 29000,
-    image: "https://source.unsplash.com/200x200/?burger",
-  },
-  {
-    name: "Coca Cola",
-    price: 10000,
-    image: "https://source.unsplash.com/200x200/?coke",
-  },
-  {
-    name: "Lechy Tea",
-    price: 12000,
-    image: "https://source.unsplash.com/200x200/?tea",
-  },
-];
+
 </script>
 
 <style scoped>

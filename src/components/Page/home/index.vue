@@ -17,8 +17,7 @@ const search = ref("");
 const selectedCategory = ref(null);
 const isLoading = ref(true);
 
-// 🛒 state baru untuk keranjang
-const cartItems = ref([]); // [{id, name, price, qty}]
+const cartItems = ref([]); 
 const showCartPopover = ref(false);
 
 const products = computed(() => productStore.products || []);
@@ -36,22 +35,12 @@ const goToAddCategory = () => router.push("/add-category");
 const goToAddProduct = () => router.push("/add-product");
 const goToCartView = () => router.push("/cart-view");
 
-const handleLogout = () => {
-  authStore.logout();
-  router.push("/login");
-};
 
-const addToCart = (product) => {
-  cartStore.addItem(product);
-  message.success(`${product.name} ditambahkan ke keranjang`);
-};
 
-// Total harga semua item
 const totalCartPrice = computed(() =>
   cartItems.value.reduce((acc, item) => acc + item.price * item.qty, 0)
 );
 
-// Total item dalam keranjang
 const totalCartQty = computed(() =>
   cartItems.value.reduce((acc, item) => acc + item.qty, 0)
 );
@@ -67,6 +56,15 @@ const filteredProducts = computed(() => {
     return matchCategory && matchSearch;
   });
 });
+const handleLogout = () => {
+  authStore.logout();
+  router.push("/login");
+};
+
+const addToCart = (product) => {
+  cartStore.addItem(product);
+  message.success(`${product.name} ditambahkan ke keranjang`);
+};
 
 const deleteProduct = (id) => {
   Modal.confirm({

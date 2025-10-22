@@ -123,7 +123,7 @@ const handleCancel = () => {
         </a-upload-dragger>
 
         <a-form layout="vertical" @submit.prevent="handleSubmit">
-          <a-form-item label="Produk">
+          <a-form-item name="name" label="Produk" :rules="[{ required: true, message: 'Please input your product name!' }]">
             <a-input
               v-model:value="formState.name"
               placeholder="Produk"
@@ -131,7 +131,7 @@ const handleCancel = () => {
             />
           </a-form-item>
 
-          <a-form-item label="Harga">
+          <a-form-item name="price" label="Harga" :rules="[{ required: true, message: 'Please input your product price!' }]">
             <a-input
               v-model:value="formState.price"
               type="number"
@@ -140,7 +140,7 @@ const handleCancel = () => {
             />
           </a-form-item>
 
-          <a-form-item label="Pilih Kategori">
+          <a-form-item label="Pilih Kategori"name="category" :rules="[{ required: true, message: 'Please select a category!' }]">
             <a-select
               v-model:value="formState.category_id"
               placeholder="Pilih kategori"

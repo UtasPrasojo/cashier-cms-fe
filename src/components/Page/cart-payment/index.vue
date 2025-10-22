@@ -6,11 +6,7 @@ import { useCartStore } from "@/stores/cart.store";
 const route = useRoute();
 const router = useRouter();
 const cartStore = useCartStore();
-
-// Ambil total dari query parameter
 const total = ref(Number(route.query.total) || 0);
-
-// Format tanggal otomatis
 const date = ref(new Date());
 const formattedDate = date.value.toLocaleDateString("id-ID", {
   day: "2-digit",
@@ -18,10 +14,8 @@ const formattedDate = date.value.toLocaleDateString("id-ID", {
   year: "numeric",
 });
 
-// Tombol kembali
-
 function handleBack() {
-  cartStore.clearCart(); // kosongkan keranjang
+  cartStore.clearCart(); 
   message.success("Pembayaran selesai! Keranjang dikosongkan.");
   router.push("/");
 }

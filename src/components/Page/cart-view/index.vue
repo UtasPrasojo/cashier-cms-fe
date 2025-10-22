@@ -22,13 +22,11 @@ const removeItem = (index) => {
 };
 
 
-
-// Fungsi tombol "Kembali"
+const goToAddCategory = () => router.push("/add-category");
+const goToAddProduct = () => router.push("/add-product");
 const goBack = () => {
   router.push("/");
 };
-
-// Fungsi tombol "Bayar"
 const goToPayment = () => {
   router.push({
     path: "/cart-payment",
@@ -38,15 +36,14 @@ const goToPayment = () => {
 </script>
 <template>
   <div class="min-h-screen bg-gray-100 p-6">
-    <!-- Header -->
     <div
       class="flex justify-between items-center bg-white rounded-2xl shadow p-4 mb-6"
     >
       <h1 class="text-2xl font-bold text-blue-600">MASPOS</h1>
 
       <div class="flex items-center gap-3">
-        <a-button type="primary" size="large">+ Tambah Kategori</a-button>
-        <a-button type="primary" size="large">+ Tambah Produk</a-button>
+        <a-button type="primary" size="large" @click="goToAddCategory">+ Tambah Kategori</a-button>
+        <a-button type="primary" size="large" @click="goToAddProduct" ghost>+ Tambah Produk</a-button>
 
         <div
           class="flex justify-start items-center bg-blue-50 border border-blue-200 text-blue-600 rounded-lg"
@@ -70,8 +67,6 @@ const goToPayment = () => {
         />
       </div>
     </div>
-
-    <!-- Table Produk -->
     <div class="bg-white rounded-2xl shadow p-4">
       <table class="w-full text-left">
         <thead>
@@ -135,8 +130,6 @@ const goToPayment = () => {
         </tbody>
       </table>
     </div>
-
-    <!-- Footer Button -->
     <div class="flex justify-end gap-3 mt-6">
       <a-button @click="goBack">Kembali</a-button>
       <a-button type="primary" @click="goToPayment">Bayar</a-button>
