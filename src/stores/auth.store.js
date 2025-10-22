@@ -15,9 +15,19 @@ export const useAuthStore = defineStore({
       try {
         const res = await axiosWrapper.post(`${baseUrl}/login`, data, true);
 
-        if (res?.data) {
-          this.user = res.data;
-          localStorage.setItem("user", JSON.stringify(res.data));
+        if (res?.data?.data) {
+          const userData = res.data.data;
+
+          // Simpan user + token
+          this.user = {
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            token: userData.token,
+          };
+
+          localStorage.setItem("user", JSON.stringify(this.user));
+
           router.push("/");
         }
       } catch (err) {
@@ -29,7 +39,6 @@ export const useAuthStore = defineStore({
     async register(data) {
       try {
         const res = await axiosWrapper.post(`${baseUrl}/register`, data, true);
-
         if (res?.data) {
           router.push("/login");
         }

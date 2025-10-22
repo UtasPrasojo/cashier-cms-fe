@@ -1,3 +1,32 @@
+<script setup>
+import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { message } from "ant-design-vue";
+import { useCartStore } from "@/stores/cart.store";
+const route = useRoute();
+const router = useRouter();
+const cartStore = useCartStore();
+
+// Ambil total dari query parameter
+const total = ref(Number(route.query.total) || 0);
+
+// Format tanggal otomatis
+const date = ref(new Date());
+const formattedDate = date.value.toLocaleDateString("id-ID", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+});
+
+// Tombol kembali
+
+function handleBack() {
+  cartStore.clearCart(); // kosongkan keranjang
+  message.success("Pembayaran selesai! Keranjang dikosongkan.");
+  router.push("/");
+}
+</script>
+
 <template>
   <div class="flex justify-center items-center min-h-screen bg-gray-100">
     <a-card class="w-[350px] text-center rounded-2xl shadow-md">
@@ -33,26 +62,6 @@
     </a-card>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref } from "vue";
-import { message } from "ant-design-vue";
-
-const total = ref(224000);
-const date = ref(new Date("2024-09-04"));
-
-const formattedDate = date.value.toLocaleDateString("id-ID", {
-  day: "2-digit",
-  month: "long",
-  year: "numeric",
-});
-
-function handleBack() {
-  message.info("Kembali ke halaman utama");
-  // contoh navigasi jika pakai vue-router:
-  // router.push('/dashboard')
-}
-</script>
 
 <style scoped>
 .ant-card {

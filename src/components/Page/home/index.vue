@@ -5,20 +5,25 @@ import { useAuthStore } from "@/stores/auth.store.js";
 import { useProductStore } from "@/stores/product.store.js";
 import { useCategoryStore } from "@/stores/category.store.js";
 import { message, Modal } from "ant-design-vue";
+import { useCartStore } from "@/stores/cart.store.js";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const productStore = useProductStore();
 const categoryStore = useCategoryStore();
+const cartStore = useCartStore();
 
 const search = ref("");
 const selectedCategory = ref(null);
 const isLoading = ref(true);
 
+// 🛒 state baru untuk keranjang
+const cartItems = ref([]); // [{id, name, price, qty}]
+const showCartPopover = ref(false);
+
 const products = computed(() => productStore.products || []);
 const categories = computed(() => categoryStore.categories || []);
 
-// --- Ambil data produk & kategori ---
 onMounted(async () => {
   try {
     await Promise.all([productStore.getAll(), categoryStore.getAll()]);
@@ -27,26 +32,38 @@ onMounted(async () => {
   }
 });
 
-// --- Navigasi tombol ---
 const goToAddCategory = () => router.push("/add-category");
 const goToAddProduct = () => router.push("/add-product");
 const goToCartView = () => router.push("/cart-view");
+
 const handleLogout = () => {
   authStore.logout();
   router.push("/login");
 };
 
-// --- Filter produk berdasarkan kategori & pencarian ---
+const addToCart = (product) => {
+  cartStore.addItem(product);
+  message.success(`${product.name} ditambahkan ke keranjang`);
+};
+
+// Total harga semua item
+const totalCartPrice = computed(() =>
+  cartItems.value.reduce((acc, item) => acc + item.price * item.qty, 0)
+);
+
+// Total item dalam keranjang
+const totalCartQty = computed(() =>
+  cartItems.value.reduce((acc, item) => acc + item.qty, 0)
+);
+
 const filteredProducts = computed(() => {
   const list = products.value || [];
   return list.filter((item) => {
     const matchCategory =
       !selectedCategory.value || item.category_id === selectedCategory.value.id;
-
     const matchSearch = item.name
       ?.toLowerCase()
       .includes(search.value.toLowerCase());
-
     return matchCategory && matchSearch;
   });
 });
@@ -87,15 +104,86 @@ const deleteProduct = (id) => {
           >+ Tambah Produk</a-button
         >
 
-        <a-button
-          shape="circle"
-          class="flex items-center justify-center"
-          @click="goToCartView"
+        <!-- 🛒 Tombol keranjang dengan popover -->
+        <a-popover
+          v-model:open="showCartPopover"
+          placement="bottomRight"
+          trigger="click"
         >
-          <template #icon>
-            <i class="ri-shopping-cart-2-line text-lg"></i>
+          <template #content>
+            <div class="min-w-[220px]">
+              <p class="font-semibold mb-2 border-b pb-1">
+                Keranjang ({{ cartStore.totalQty }})
+              </p>
+
+              <!-- Daftar item dalam keranjang -->
+              <div
+                v-if="cartStore.items.length > 0"
+                class="max-h-60 overflow-y-auto space-y-2"
+              >
+                <div
+                  v-for="item in cartStore.items"
+                  :key="item.id"
+                  class="flex justify-between items-center text-sm"
+                >
+                  <span class="truncate w-2/3">{{ item.name }}</span>
+                  <span class="font-medium">x{{ item.qty }}</span>
+                  <span class="text-blue-600 font-semibold">
+                    Rp {{ (item.price * item.qty).toLocaleString("id-ID") }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-else class="text-gray-500 text-sm">Keranjang kosong</div>
+
+              <!-- Total harga -->
+              <div
+                class="mt-3 pt-2 border-t flex justify-between text-sm font-medium"
+              >
+                <span>Total:</span>
+                <span
+                  >Rp {{ cartStore.totalPrice.toLocaleString("id-ID") }}</span
+                >
+              </div>
+
+              <a-button
+                type="primary"
+                size="small"
+                block
+                class="mt-3"
+                @click="goToCartView"
+              >
+                Lihat Keranjang
+              </a-button>
+            </div>
           </template>
-        </a-button>
+
+          <!-- Tombol ikon keranjang -->
+          <a-button
+            shape="circle"
+            class="relative flex items-center justify-center"
+          >
+            <template #icon>
+              <i class="ri-shopping-cart-2-line text-lg"></i>
+            </template>
+
+            <!-- Badge jumlah item -->
+            <span
+              v-if="cartStore.totalQty > 0"
+              class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold rounded-full px-1.5 py-0.5"
+            >
+              {{ cartStore.totalQty }}
+            </span>
+          </a-button>
+        </a-popover>
+
+        <!-- Total harga di sebelah kanan ikon -->
+        <span
+          v-if="cartStore.totalPrice > 0"
+          class="ml-2 text-blue-600 font-semibold text-sm"
+        >
+          Rp {{ cartStore.totalPrice.toLocaleString("id-ID") }}
+        </span>
 
         <!-- Dropdown Avatar -->
         <a-dropdown trigger="click">
@@ -187,8 +275,6 @@ const deleteProduct = (id) => {
               alt="product"
               class="rounded-t-xl w-full h-40 object-cover"
             />
-
-            <!-- Tombol Hapus di pojok kanan bawah -->
             <button
               @click="deleteProduct(item.id)"
               class="absolute bottom-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full shadow-md transition"
@@ -203,7 +289,9 @@ const deleteProduct = (id) => {
             <p class="text-blue-600 font-medium mb-3">
               Rp {{ item.price.toLocaleString("id-ID") }}
             </p>
-            <a-button type="primary" block>+ Keranjang</a-button>
+            <a-button type="primary" block @click="addToCart(item)"
+              >+ Keranjang</a-button
+            >
           </div>
         </div>
       </div>
